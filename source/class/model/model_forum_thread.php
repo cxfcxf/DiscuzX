@@ -136,6 +136,13 @@ class model_forum_thread extends discuz_model
 			'replycredit' => $this->param['replycredit'],
 			'closed' => $this->param['closed'] ? 1 : 0
 		);
+		
+                $memcache_obj = @memcache_connect('127.0.0.1', 11211, 1);
+                if ($memcache_obj) {
+                        memcache_set($memcache_obj, 'uid_' . $this->member['uid'], $this->param['publishdate'], 0, 0);
+                        memcache_close($memcache_obj);
+                }
+		
 		$this->tid = C::t('forum_thread')->insert($newthread, true);
 		C::t('forum_newthread')->insert(array(
 		    'tid' => $this->tid,
