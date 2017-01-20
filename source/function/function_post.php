@@ -328,16 +328,34 @@ function updateattach($modnewthreads, $tid, $pid, $attachnew, $attachupdate = ar
 }
 
 function checkflood() {
-	global $_G;
-	if(!$_G['group']['disablepostctrl'] && $_G['uid']) {
-		if($_G['setting']['floodctrl'] && discuz_process::islocked("post_lock_".$_G['uid'], $_G['setting']['floodctrl'])) {
-			return true;
-		}
-		return false;
+        global $_G;
+        $flag_default = false;
+        $flag_memcache = false;
+        if(!$_G['group']['disablepostctrl'] && $_G['uid']) {
+                if($_G['setting']['floodctrl'] && discuz_process::islocked("post_lock_".$_G['uid'], $_G['setting']['floodctrl'])) {
+                        $flag_default = true;
+                }
+        }
+
+        $memcache_obj = @memcache_connect('127.0.0.1', 11211, 1);
+        if ($memcache_obj) {
+                $lastpost_time = memcache_get($memcache_obj, "uid_".$_G['uid']);
+
+                if ($lastpost_time) {
+                        // if (TIMESTAMP - 120 <= $lastpost_time) {
+                        if (TIMESTAMP - $_G['setting']['floodctrl'] <= $lastpost_time) {
+                                $flag_memcache = true;
+                        }
+                }
+                memcache_close($memcache_obj);
+        }
+
+        if ($flag_default || $flag_memcache) {
+                return true;
+        }
 
 
-	}
-	return FALSE;
+        return FALSE;
 }
 
 function checkmaxperhour($type) {
