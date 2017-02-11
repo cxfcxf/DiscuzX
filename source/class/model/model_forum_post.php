@@ -139,7 +139,12 @@ class model_forum_post extends discuz_model {
 			'status' => $status,
 		));
 
-
+                $memcache_obj = @memcache_connect('127.0.0.1', 11211, 1);
+                if ($memcache_obj) {
+                        memcache_set($memcache_obj, 'uid_' . $this->member['uid'], $this->param['publishdate'], 0, 0);
+                        memcache_close($memcache_obj);
+                }
+		
 		$this->param['updatethreaddata'] = $heatthreadset ? $heatthreadset : array();
 		$this->param['maxposition'] = C::t('forum_post')->fetch_maxposition_by_tid($this->thread['posttableid'], $this->thread['tid']);
 		$this->param['updatethreaddata'][] = DB::field('maxposition', $this->param['maxposition']);
