@@ -141,7 +141,7 @@ class model_forum_post extends discuz_model {
 
                 $memcache_obj = @memcache_connect('127.0.0.1', 11211, 1);
                 if ($memcache_obj) {
-                        memcache_set($memcache_obj, 'uid_' . $this->member['uid'], $this->param['publishdate'], 0, 0);
+                        memcache_set($memcache_obj, 'uid_' . $this->member['uid'], getglobal('timestamp'), 0, 0);
                         memcache_close($memcache_obj);
                 }
 		
